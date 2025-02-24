@@ -1,0 +1,63 @@
+﻿@model Category
+
+@{
+    ViewData["Title"] = "Edit Category";
+}
+
+<div class="container mt-4">
+    <h1 class="mb-4">Edit Category</h1>
+
+    <div class="card shadow-sm p-4">
+        <form id="categoryForm" method="post">
+            <div id="error-summary" class="alert alert-danger d-none"></div>
+
+            <div class="mb-3">
+                <label for="CategoryId" class="form-label">Category ID</label>
+                <input type="text" id="CategoryId" name="CategoryId" class="form-control" value="@Model.CategoryId" readonly />
+            </div>
+
+            <div class="mb-3">
+                <label for="CategoryName" class="form-label">Category Name</label>
+                <input type="text" id="CategoryName" name="CategoryName" class="form-control" value="@Model.CategoryName" />
+                <span id="CategoryNameError" class="text-danger"></span>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">Save</button>
+                <a href="@Url.Action("Index")" class="btn btn-secondary">Back to List</a>
+            </div>
+
+            @if (!string.IsNullOrEmpty(ViewBag.ErrorMessage))
+            {
+                <div class="alert alert-danger mt-3">@ViewBag.ErrorMessage</div>
+            }
+        </form>
+    </div>
+</div>
+
+<script>
+    document.getElementById("categoryForm").addEventListener("submit", function (event) {
+        event.preventDefault();
+        let isValid = true;
+
+        let errorSummary = document.getElementById("error-summary");
+        let categoryNameError = document.getElementById("CategoryNameError");
+        let categoryName = document.getElementById("CategoryName").value.trim();
+
+        errorSummary.classList.add("d-none");
+        errorSummary.innerText = "";
+        categoryNameError.innerText = "";
+
+        if (!categoryName) {
+            categoryNameError.innerText = "Category Name is required.";
+            isValid = false;
+        }
+
+        if (!isValid) {
+            errorSummary.innerText = "Please fix the errors above.";
+            errorSummary.classList.remove("d-none");
+        } else {
+            this.submit();
+        }
+    });
+</script>
