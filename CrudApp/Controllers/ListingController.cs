@@ -15,7 +15,6 @@ namespace CrudApp.Controllers
 
         public IActionResult Index(int page = 1, int pageSize = 10)
         {
-            git init
             int totalRecords = dal.GetTotalProductCount(); 
             int totalPages = (int)Math.Ceiling((double)totalRecords / pageSize);
 
