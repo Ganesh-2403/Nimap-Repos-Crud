@@ -1,4 +1,4 @@
-﻿using CrudApp.Models;
+using CrudApp.Models;
 using System.Data.SqlClient;
 using System.Data;
 
@@ -71,10 +71,26 @@ namespace CrudApp
                     CommandType = CommandType.StoredProcedure
                 };
                 cmd.Parameters.AddWithValue("@CategoryName", category.CategoryName);
-                con.Open();
-                cmd.ExecuteNonQuery();
+
+                try
+                {
+                    con.Open();
+                    cmd.ExecuteNonQuery();
+                }
+                catch (SqlException ex)
+                {
+                    if (ex.Number == 2627) // SQL Server duplicate entry error code
+                    {
+                        throw new Exception("Category name already exists.");
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
             }
         }
+
 
         public void UpdateCategory(Category category)
         {
@@ -93,16 +109,27 @@ namespace CrudApp
 
         public void DeleteCategory(int categoryId)
         {
-            using (SqlConnection con = new SqlConnection(cs))
+            try
             {
-                SqlCommand cmd = new SqlCommand("DeleteCategory", con)
+                using (SqlConnection con = new SqlConnection(cs))
                 {
-                    CommandType = CommandType.StoredProcedure
-                };
-                cmd.Parameters.AddWithValue("@CategoryId", categoryId);
-                con.Open();
-                cmd.ExecuteNonQuery();
+                    using (SqlCommand cmd = new SqlCommand("DeleteCategory", con))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.AddWithValue("@CategoryId", categoryId);
+
+                        con.Open();
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error deleting category: " + ex.Message);
             }
         }
+
+
     }
 }
+
