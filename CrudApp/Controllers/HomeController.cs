@@ -1,4 +1,4 @@
-﻿using CrudApp.Models;
+using CrudApp.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using System.Collections.Generic;
@@ -36,16 +36,24 @@ namespace CrudApp.Controllers
         {
             try
             {
-                int newId = dal.AddProduct(prod); // Get the new ProductId
+                int newId = dal.AddProduct(prod);
                 TempData["SuccessMessage"] = $"Product added successfully with ID: {newId}";
                 return RedirectToAction("Index");
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError("", "An error occurred while adding the product.");
+                if (ex.Message.Contains("Product name already exists"))
+                {
+                    ModelState.AddModelError("ProductName", "This product name already exists. Please choose a different name.");
+                }
+                else
+                {
+                    ModelState.AddModelError("", "An error occurred while adding the product.");
+                }
                 return View(prod);
             }
         }
+
 
 
 
