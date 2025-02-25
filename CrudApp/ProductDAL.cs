@@ -1,4 +1,4 @@
-﻿using CrudApp.Models;
+using CrudApp.Models;
 using System.Data.SqlClient;
 using System.Data;
 using Microsoft.CodeAnalysis;
@@ -75,8 +75,10 @@ namespace CrudApp
         {
             using (SqlConnection con = new SqlConnection(cs))
             {
-                SqlCommand cmd = new SqlCommand("InsertProduct", con);
-                cmd.CommandType = CommandType.StoredProcedure;
+                SqlCommand cmd = new SqlCommand("InsertProduct", con)
+                {
+                    CommandType = CommandType.StoredProcedure
+                };
                 cmd.Parameters.AddWithValue("@ProductName", prod.ProductName);
                 cmd.Parameters.AddWithValue("@CategoryId", prod.CategoryId);
 
@@ -89,9 +91,17 @@ namespace CrudApp
                 con.Open();
                 cmd.ExecuteNonQuery();
 
-                return (int)outputParam.Value; 
+                int newProductId = (int)outputParam.Value;
+
+                if (newProductId == -1)
+                {
+                    throw new Exception("Product name already exists.");
+                }
+
+                return newProductId;
             }
         }
+
 
 
         public void DeleteProduct(int productId)
