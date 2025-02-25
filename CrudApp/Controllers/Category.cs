@@ -1,6 +1,7 @@
-﻿using CrudApp.Models;
+using CrudApp.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using System.Linq; // Required for Any() method
 
 namespace CrudApp.Controllers
 {
@@ -18,30 +19,32 @@ namespace CrudApp.Controllers
             IEnumerable<Category> categories = _categoryDal.GetAllCategories();
             return View(categories);
         }
- 
+
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: Category/Create
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult Create(Category category)
         {
-            try
+            if (!ModelState.IsValid)
             {
-                Console.WriteLine("Category received: " + (category?.CategoryName ?? "NULL"));
-                _categoryDal.AddCategory(category);
-                return RedirectToAction("Index");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Error: " + ex.Message);
-                ViewBag.ErrorMessage = ex.Message;
                 return View(category);
             }
+
+            if (_categoryDal.GetAllCategories().Any(c => c.CategoryName.ToLower() == category.CategoryName.ToLower()))
+            {
+                ModelState.AddModelError("CategoryName", "Category name already exists.");
+                return View(category);
+            }
+
+            _categoryDal.AddCategory(category);
+            return RedirectToAction("Index");
         }
+
 
         public IActionResult Edit(int id)
         {
@@ -50,7 +53,7 @@ namespace CrudApp.Controllers
             {
                 return NotFound();
             }
-            return View(category); 
+            return View(category);
         }
 
         [HttpPost]
@@ -72,21 +75,20 @@ namespace CrudApp.Controllers
 
         public IActionResult Delete(int id)
         {
-            Category category = _categoryDal.GetCategoryById(id);
+            var category = _categoryDal.GetCategoryById(id);
             if (category == null)
             {
                 return NotFound();
             }
-            return View(category); 
+            return View(category);
         }
-
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult DeleteConfirmed(int id)
+        public IActionResult DeleteConfirmed(int CategoryId)
         {
-            _categoryDal.DeleteCategory(id);
-            return RedirectToAction(nameof(Index));
+            _categoryDal.DeleteCategory(CategoryId);
+            return RedirectToAction("Index");
         }
 
 
